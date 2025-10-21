@@ -10,9 +10,10 @@ import { TaskModule } from 'src/tasks/task_module';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { UsersModule } from 'src/users/users.module';
 import { LoggerMiddleware } from 'src/common/middleware/logger_middleware';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [TaskModule, PrismaModule, UsersModule],
+  imports: [TaskModule, PrismaModule, UsersModule, ConfigModule.forRoot()],
   controllers: [AppController],
   providers: [AppService],
 })

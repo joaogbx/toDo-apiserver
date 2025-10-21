@@ -7,6 +7,8 @@ export class AppController {
 
   @Get()
   getHello(): string {
+    const usandoConfigModule = process.env.TOKEssN_KEY;
+    console.log(usandoConfigModule);
     return this.appService.getHello();
   }
 }

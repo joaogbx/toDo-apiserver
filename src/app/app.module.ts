@@ -11,9 +11,16 @@ import { PrismaModule } from 'src/prisma/prisma.module';
 import { UsersModule } from 'src/users/users.module';
 import { LoggerMiddleware } from 'src/common/middleware/logger_middleware';
 import { ConfigModule } from '@nestjs/config';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
-  imports: [TaskModule, PrismaModule, UsersModule, ConfigModule.forRoot()],
+  imports: [
+    TaskModule,
+    PrismaModule,
+    UsersModule,
+    ConfigModule.forRoot(),
+    AuthModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

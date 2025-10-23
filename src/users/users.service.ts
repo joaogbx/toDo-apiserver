@@ -1,4 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { User } from 'prisma/generated/prisma';
+import { HashingServiceProtocol } from 'src/auth/hash/hashing.service';
 import { CreateUserDto } from 'src/common/dto/create-user-dto';
 import { UpdateUserDto } from 'src/common/dto/update-user-dto';
 import { PrismaModule } from 'src/prisma/prisma.module';
@@ -6,7 +8,10 @@ import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly hashingProtocol: HashingServiceProtocol,
+  ) {}
 
   async findOneUser(id: number) {
     const user = await this.prisma.user.findFirst({
@@ -28,11 +33,15 @@ export class UsersService {
 
   async createUser(createUserDto: CreateUserDto) {
     try {
+      const passwordHash = await this.hashingProtocol.hash(
+        createUserDto.password,
+      );
+
       const newUser = await this.prisma.user.create({
         data: {
           name: createUserDto.name,
           email: createUserDto.email,
-          password_hash: createUserDto.password,
+          password_hash: passwordHash,
         },
         select: {
           id: true,
@@ -59,16 +68,29 @@ export class UsersService {
       if (!user)
         throw new HttpException('Usuário não encontrado', HttpStatus.NOT_FOUND);
 
+      const updateData: Partial<User> = {
+        name: updateUserDto.name ? updateUserDto.name : user.name,
+        email: updateUserDto.email ? updateUserDto.email : user.email,
+      };
+
+      if (updateUserDto.password) {
+        const passwordHash = await this.hashingProtocol.hash(
+          updateUserDto.password,
+        );
+        updateData.password_hash = passwordHash;
+      }
+
       await this.prisma.user.update({
         where: {
           id: id,
         },
-        data: {
-          name: updateUserDto.name ? updateUserDto.name : user.name,
-        },
+        data: updateData,
       });
 
-      return 'Usuário atualizado com sucesso';
+      return {
+        name: updateData.name,
+        email: updateData.email,
+      };
     } catch (error) {
       throw new HttpException(error, HttpStatus.BAD_REQUEST);
     }

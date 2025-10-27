@@ -18,11 +18,11 @@ import { CreateTaskDto } from 'src/common/dto/create-task-dto';
 import { PaginationDto } from 'src/common/dto/pagination-task-dto';
 import { UpdateTaskDto } from 'src/common/dto/update-task-dto';
 import { LoggerInterceptor } from 'src/common/interceptors/logger.interceptor';
-import { AuthAdminGuard } from 'src/common/guards/auth_admin_guard';
+import { AuthTokenGuard } from 'src/common/guards/auth-token.guard';
 
 @Controller('/task')
 @UseInterceptors(LoggerInterceptor)
-@UseGuards(AuthAdminGuard)
+@UseGuards(AuthTokenGuard)
 export class TaskController {
   constructor(private readonly taskService: TaskService) {}
 

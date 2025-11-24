@@ -1,10 +1,12 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import path from 'node:path';
 import { User } from 'prisma/generated/prisma';
 import { HashingServiceProtocol } from 'src/auth/hash/hashing.service';
 import { CreateUserDto } from 'src/common/dto/create-user-dto';
 import { UpdateUserDto } from 'src/common/dto/update-user-dto';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { PrismaService } from 'src/prisma/prisma.service';
+import * as fs from 'node:fs/promises';
 
 @Injectable()
 export class UsersService {
@@ -120,5 +122,31 @@ export class UsersService {
         HttpStatus.BAD_REQUEST,
       );
     }
+  }
+
+  async processarUploadImagem(file: Express.Multer.File) {
+    // 💡 Lógica de Negócios AQUI:
+    // 1. Salvar os metadados no banco de dados.
+    // 2. O arquivo já foi salvo localmente (se o multer estiver configurado para isso).
+    // 3. Opcional: Manipular o 'file.buffer' e enviá-lo para a nuvem.
+
+    // Para fins didáticos, apenas retornamos as informações do arquivo.
+    const resultado = {
+      mensagem: 'Upload da imagem processado com sucesso!',
+      nomeOriginal: file.originalname,
+      nomeGerado: file.filename, // Se configurou o `diskStorage` para renomear
+      mimeType: file.mimetype,
+      tamanho: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
+      // Se estivesse salvo localmente em 'uploads/', você teria:
+      // urlLocal: `http://localhost:3000/uploads/${file.filename}`,
+    };
+
+    const fileLocale = path.resolve(process.cwd(), 'files', file.originalname);
+
+    await fs.writeFile(fileLocale, file.buffer);
+
+    console.log('Informacções da Imagem no Service:', resultado);
+
+    return resultado;
   }
 }
